@@ -28,6 +28,8 @@
     "elysia": "^1.0.10",
     "eslint-plugin-drizzle": "^0.2.3",
     "get-port": "^7.1.0",
-    "slugify": "^1.6.6"
+    "postgres": "^3.4.4",
+    "slugify": "^1.6.6",
+    "valibot": "^0.30.0"
   }
 }

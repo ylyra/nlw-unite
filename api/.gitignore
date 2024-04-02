@@ -182,3 +182,4 @@ pnpm-lock.yaml
 .env
 .env*.local
 sqlite.db
+db-data

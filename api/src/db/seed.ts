@@ -16,15 +16,16 @@ const eventsItems: (typeof events.$inferInsert)[] = Array.from({
   length: 300,
 }).map((_, i) => {
   const title = faker.company.name().concat(` Event ${i}`)
+  const maximumAttendees = faker.number.int({
+    max: 100,
+    min: 1,
+  })
   return {
     id: createId(),
     title,
     details: faker.lorem.paragraph(),
     slug: faker.helpers.slugify(title.toLocaleLowerCase()),
-    maximumAttendees: faker.number.int({
-      max: 100,
-      min: 1,
-    }),
+    maximumAttendees: maximumAttendees < 10 ? undefined : maximumAttendees,
   }
 })
 await db.insert(events).values(eventsItems)

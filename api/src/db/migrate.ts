@@ -1,8 +1,21 @@
-import { migrate } from 'drizzle-orm/bun-sqlite/migrator'
+import chalk from 'chalk'
+import postgres from 'postgres'
 
-import { Database } from 'bun:sqlite'
-import { drizzle } from 'drizzle-orm/bun-sqlite'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import { migrate } from 'drizzle-orm/postgres-js/migrator'
+import { env } from '../env'
 
-const sqlite = new Database('sqlite.db')
-const db = drizzle(sqlite)
-migrate(db, { migrationsFolder: './drizzle' })
+const connection = postgres(env.DATABASE_URL, {
+  max: 1,
+})
+const db = drizzle(connection)
+
+await migrate(db, {
+  migrationsFolder: 'drizzle',
+})
+
+console.log(chalk.greenBright('Migrations applied successfully!'))
+
+await connection.end()
+
+process.exit()

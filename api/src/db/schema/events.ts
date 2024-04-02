@@ -1,7 +1,7 @@
 import { createId } from '@paralleldrive/cuid2'
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { integer, pgTable, text } from 'drizzle-orm/pg-core'
 
-export const events = sqliteTable('events', {
+export const events = pgTable('events', {
   id: text('id').$defaultFn(createId).primaryKey(),
   title: text('title').notNull(),
   details: text('details'),
