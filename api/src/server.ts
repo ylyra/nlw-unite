@@ -1,3 +1,4 @@
+import swagger from '@elysiajs/swagger'
 import { Elysia } from 'elysia'
 import { env } from './env'
 import { createEvent } from './http/routes/create-event'
@@ -21,6 +22,7 @@ const app = new Elysia()
       }
     }
   })
+  .use(swagger())
   .use(createEvent)
 
 app.listen(port, () => {

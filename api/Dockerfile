@@ -23,9 +23,6 @@ COPY --from=base /app/package.json ./package.json
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 
-ENV NODE_ENV=production
-ENV PORT=3333
-
-EXPOSE 3333
+EXPOSE ${PORT}
 
 CMD ["bun", "start"]

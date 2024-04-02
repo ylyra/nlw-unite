@@ -20,7 +20,9 @@ export const createEvent = new Elysia().post(
     const item = data[0]
 
     set.status = 201
-    return item
+    return {
+      eventId: item.id,
+    }
   },
   {
     body: t.Object({

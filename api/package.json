@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "bun --watch src/server.ts",
     "build": "bun build src/server.ts --outdir ./dist --target bun",
-    "start": "NODE_ENV=production bun run ./dist/server.js",
+    "start": "bun run ./dist/server.js",
     "lint": "eslint --fix src --ext ts",
     "migrate": "bun src/db/migrate.ts",
     "seed": "bun src/db/seed.ts",
@@ -22,6 +22,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@elysiajs/swagger": "^1.0.3",
     "@libsql/client": "^0.6.0",
     "@paralleldrive/cuid2": "^2.2.2",
     "drizzle-orm": "^0.30.6",

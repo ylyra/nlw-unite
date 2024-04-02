@@ -1,8 +1,23 @@
 version: "3.7"
 
 services:
+  api-pass-in:
+    build: 
+      context: .
+    container_name: api-pass-in
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT}
+    depends_on:
+      - postgres
+    networks:
+      - passin
+
   postgres:
     image: postgres:16.2
+    container_name: db-pass-in
     ports:
       - "${DB_PORT}:5432"
     environment:
@@ -10,4 +25,13 @@ services:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_DB=${DB_NAME}
     volumes:
-      - ./db-data:/var/lib/postgresql/data
+      - 'db:/var/lib/postgresql/data'
+    networks:
+      - passin
+
+networks:
+  passin:
+    driver: bridge
+
+volumes:
+  db:
