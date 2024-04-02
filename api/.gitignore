@@ -183,3 +183,5 @@ pnpm-lock.yaml
 .env*.local
 sqlite.db
 db-data
+build
+dist

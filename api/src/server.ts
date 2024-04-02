@@ -1,9 +1,8 @@
-import getPort from 'get-port'
-
 import { Elysia } from 'elysia'
+import { env } from './env'
 import { createEvent } from './http/routes/create-event'
 
-const port = await getPort({ port: [3333, 3334, 3335, 3336] })
+const port = env.PORT
 
 const app = new Elysia()
   .onError(({ code, error, set }) => {
