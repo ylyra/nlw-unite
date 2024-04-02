@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+defaults:
+ run:
+  working-directory: ./api
+
 jobs:
   build-and-push:
     name: 'Build and Push API'
@@ -14,6 +18,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
 
+
     - name: Generate hash
       id: generate_hash
       run: |
@@ -21,4 +26,4 @@ jobs:
         echo "hash=$HASH" >> $GITHUB_OUTPUT
 
     - name: Build docker image
-      run: docker build -t ylyra/passin:${{ steps.generate_hash.outputs.hash }} -f ./api
+      run: docker build -t ylyra/passin:${{ steps.generate_hash.outputs.hash }} .
