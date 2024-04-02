@@ -6,3 +6,4 @@ Dockerfile
 .dockerignore
 .gitignore
 vercel.json
+db-data
