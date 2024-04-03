@@ -8,6 +8,27 @@
       "when": 1712029371585,
       "tag": "0000_perpetual_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1712102288668,
+      "tag": "0001_flashy_morgan_stark",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1712102880534,
+      "tag": "0002_tense_the_executioner",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1712105499388,
+      "tag": "0003_clumsy_thor_girl",
+      "breakpoints": true
     }
   ]
 }

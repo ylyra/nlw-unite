@@ -1,0 +1,1 @@
+ALTER TABLE "attendees" ADD CONSTRAINT "attendees_name_email_event_id_unq" UNIQUE NULLS NOT DISTINCT("email","event_id");
