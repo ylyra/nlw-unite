@@ -1,9 +1,10 @@
 import { Elysia, t } from 'elysia'
 import { db } from '../../db/connection'
+import { checkIns } from '../../db/schema'
 
-export const getAttendeeBadge = new Elysia().get(
-  '/attendees/:attendeeId/badge',
-  async ({ set, params, request }) => {
+export const checkIn = new Elysia().get(
+  '/attendees/:attendeeId/check-in',
+  async ({ set, params }) => {
     const attendee = await db.query.attendees.findFirst({
       where(fields, operators) {
         return operators.eq(fields.id, params.attendeeId)
@@ -14,11 +15,7 @@ export const getAttendeeBadge = new Elysia().get(
         email: true,
       },
       with: {
-        event: {
-          columns: {
-            title: true,
-          },
-        },
+        checkIn: true,
       },
     })
 
@@ -30,21 +27,19 @@ export const getAttendeeBadge = new Elysia().get(
       }
     }
 
-    console.log(request.url)
+    if (attendee.checkIn) {
+      set.status = 400
 
-    const checkInUrl = new URL(
-      `/attendees/${attendee.id}/check-in`,
-      request.url,
-    )
-
-    return {
-      badge: {
-        name: attendee.name,
-        email: attendee.email,
-        eventTitle: attendee.event.title,
-        checkInUrl: checkInUrl.toString(),
-      },
+      return {
+        message: 'Attendee already checked in',
+      }
     }
+
+    await db.insert(checkIns).values({
+      attendeeId: attendee.id,
+    })
+
+    set.status = 201
   },
   {
     params: t.Object({

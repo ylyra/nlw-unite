@@ -1,5 +1,6 @@
 import { relations } from 'drizzle-orm'
 import { pgTable, serial, text, timestamp, unique } from 'drizzle-orm/pg-core'
+import { checkIns } from './checkins'
 import { events } from './events'
 
 export const attendees = pgTable(
@@ -27,6 +28,10 @@ export const attendeesRelations = relations(attendees, ({ one }) => {
     event: one(events, {
       fields: [attendees.eventId],
       references: [events.id],
+    }),
+    checkIn: one(checkIns, {
+      fields: [attendees.id],
+      references: [checkIns.attendeeId],
     }),
   }
 })
