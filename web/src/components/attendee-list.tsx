@@ -1,3 +1,8 @@
+import { useQuery } from '@tanstack/react-query'
+import dayjs from 'dayjs'
+import 'dayjs/locale/pt-br'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import debounce from 'lodash/debounce'
 import {
   ChevronLeft,
   ChevronRight,
@@ -6,8 +11,10 @@ import {
   MoreHorizontal,
   Search,
 } from 'lucide-react'
-import { useState } from 'react'
+import { Fragment, useCallback, useState } from 'react'
+import { api } from '../services/api'
 import { IconButton } from './icon-buttont'
+import { Skeleton } from './skeleton'
 import {
   Table,
   TableCell,
@@ -17,20 +24,71 @@ import {
   TableRow,
 } from './table'
 
-const items = Array.from({ length: 100 }).map((_, i) => ({
-  id: '7e37bc62-3c87-4443-8512-1515576655c3'.concat(String(i)),
-  code: '52716',
-  name: 'João da Silva',
-  email: 'joao@silva.com',
-  createdAt: '7 dias atrás',
-  checkedInAt: '3 dias atrás',
-}))
+type Attendee = {
+  id: number
+  name: string
+  email: string
+  createdAt: string
+  checkedInAt: string | null
+}
 
+dayjs.extend(relativeTime)
+dayjs.locale('pt-br')
 export function AttendeeList() {
-  const [page, setPage] = useState(1)
-  const [search, setSearch] = useState('')
+  const [page, setPage] = useState(() => {
+    const url = new URL(window.location.href)
+    const page = url.searchParams.get('page')
 
-  const paginated = items.slice((page - 1) * 10, page * 10)
+    return url.searchParams.has('page') ? Number(page) : 1
+  })
+  const [search, setSearch] = useState(() => {
+    const url = new URL(window.location.href)
+    const search = url.searchParams.get('search')
+
+    return search || ''
+  })
+
+  const { data, refetch, isFetching } = useQuery({
+    queryKey: ['attendees', page],
+    queryFn: async () => {
+      const response = await api.get<{
+        attendees: Attendee[]
+        total: number
+      }>('/events/h3991hlro97uk3wp62jqt0zw/attendees', {
+        params: {
+          pageIndex: page - 1,
+          ...(search.length > 0 && { query: search }),
+        },
+      })
+
+      return response.data
+    },
+    initialData: {
+      attendees: [],
+      total: 0,
+    },
+  })
+  const totalPages = Math.ceil(data.total / 10)
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      setPage(1)
+      const url = new URL(window.location.href)
+      url.searchParams.set('search', value)
+      window.history.pushState({}, '', url.toString())
+
+      refetch()
+    }, 500),
+    [],
+  )
+
+  function setCurrentPage(page: number) {
+    const url = new URL(window.location.href)
+    url.searchParams.set('page', page.toString())
+    setPage(page)
+    window.history.pushState({}, '', url.toString())
+  }
 
   return (
     <section className="py-2">
@@ -45,7 +103,11 @@ export function AttendeeList() {
               className="bg-transparent outline-none border-none py-1.5 focus:outline-none focus:ring-0 text-sm placeholder:text-zinc-400"
               placeholder="Buscar participante..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value)
+
+                debouncedSearch(e.target.value)
+              }}
             />
           </div>
         </div>
@@ -68,56 +130,104 @@ export function AttendeeList() {
           </TableHeader>
 
           <tbody>
-            {paginated.map((item) => (
-              <TableRow key={item.id} className="border-b border-white/10">
-                <TableCell>
-                  <input
-                    type="checkbox"
-                    className="size-4 bg-black/20 rounded border-white/10 text-orange-400 focus:ring-offset-zinc-950 focus:ring-orange-400"
-                  />
-                </TableCell>
-                <TableCell>{item.code}</TableCell>
-                <TableCell>
-                  <div>
-                    <span className="text-zinc-50 font-semibold block">
-                      {item.name}
-                    </span>
-                    <span>{item.email}</span>
-                  </div>
-                </TableCell>
-                <TableCell>{item.createdAt}</TableCell>
-                <TableCell>{item.checkedInAt}</TableCell>
-                <TableCell>
-                  <IconButton className="bg-black/20">
-                    <MoreHorizontal className="size-4" />
-                  </IconButton>
-                </TableCell>
-              </TableRow>
-            ))}
+            {isFetching && (
+              <Fragment>
+                {Array.from({
+                  length: 10,
+                }).map((_, idx) => (
+                  <TableRow
+                    key={`loading-attendee-${idx}`}
+                    className="border-b border-white/10"
+                  >
+                    <TableCell>
+                      <input
+                        type="checkbox"
+                        className="size-4 bg-black/20 rounded border-white/10 text-orange-400 focus:ring-offset-zinc-950 focus:ring-orange-400"
+                        disabled
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-9" />
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-px">
+                        <Skeleton className="w-32 h-4" />
+                        <Skeleton className="w-24 h-4" />
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="w-24 h-4" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="w-24 h-4" />
+                    </TableCell>
+                    <TableCell>
+                      <IconButton className="bg-black/20" disabled>
+                        <MoreHorizontal className="size-4" />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </Fragment>
+            )}
+
+            {!isFetching &&
+              data.attendees.map((item) => (
+                <TableRow key={item.id} className="border-b border-white/10">
+                  <TableCell>
+                    <input
+                      type="checkbox"
+                      className="size-4 bg-black/20 rounded border-white/10 text-orange-400 focus:ring-offset-zinc-950 focus:ring-orange-400"
+                    />
+                  </TableCell>
+                  <TableCell>{item.id}</TableCell>
+                  <TableCell>
+                    <div>
+                      <span className="text-zinc-50 font-semibold block">
+                        {item.name}
+                      </span>
+                      <span>{item.email}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{dayjs().to(item.createdAt)}</TableCell>
+                  <TableCell>
+                    {item.checkedInAt ? (
+                      dayjs().to(item.checkedInAt)
+                    ) : (
+                      <span className="text-zinc-500">Não fez check-in</span>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <IconButton className="bg-black/20">
+                      <MoreHorizontal className="size-4" />
+                    </IconButton>
+                  </TableCell>
+                </TableRow>
+              ))}
           </tbody>
 
           <TableFooter>
             <TableRow>
               <TableCell colSpan={3}>
-                Mostrando {page * 10} de {items.length} participantes
+                Mostrando {data.attendees.length} de {data.total} participantes
               </TableCell>
 
               <TableCell className="text-right " colSpan={3}>
                 <div className="flex items-center justify-end gap-8">
                   <p>
-                    Página {page} de {Math.ceil(items.length / 10)}
+                    Página {page} de {Math.ceil(data.total / 10)}
                   </p>
 
                   <div className="flex items-center gap-1.5">
                     <IconButton
-                      onClick={() => setPage(1)}
+                      onClick={() => setCurrentPage(1)}
                       disabled={page === 1}
                     >
                       <ChevronsLeft className="size-4" />
                     </IconButton>
 
                     <IconButton
-                      onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+                      onClick={() => setCurrentPage(Math.max(page - 1, 1))}
                       disabled={page === 1}
                     >
                       <ChevronLeft className="size-4" />
@@ -125,18 +235,16 @@ export function AttendeeList() {
 
                     <IconButton
                       onClick={() =>
-                        setPage((prev) =>
-                          Math.min(prev + 1, Math.ceil(items.length / 10)),
-                        )
+                        setCurrentPage(Math.min(page + 1, totalPages))
                       }
-                      disabled={page === Math.ceil(items.length / 10)}
+                      disabled={page === totalPages}
                     >
                       <ChevronRight className="size-4" />
                     </IconButton>
 
                     <IconButton
-                      onClick={() => setPage(Math.ceil(items.length / 10))}
-                      disabled={page === Math.ceil(items.length / 10)}
+                      onClick={() => setCurrentPage(totalPages)}
+                      disabled={page === totalPages}
                     >
                       <ChevronsRight className="size-4" />
                     </IconButton>

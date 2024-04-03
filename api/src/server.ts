@@ -1,3 +1,4 @@
+import cors from '@elysiajs/cors'
 import swagger from '@elysiajs/swagger'
 import { Elysia } from 'elysia'
 import { env } from './env'
@@ -15,6 +16,13 @@ const app = new Elysia()
         set.status = 400
         return error.toResponse()
       }
+      case 'NOT_FOUND': {
+        set.status = 404
+        return {
+          code,
+          message: 'Not Found',
+        }
+      }
       default: {
         set.status = 500
 
@@ -25,6 +33,7 @@ const app = new Elysia()
       }
     }
   })
+  .use(cors())
   .use(
     swagger({
       theme: 'kepler', // saturn, bluePlanet, kepler

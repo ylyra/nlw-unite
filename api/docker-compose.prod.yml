@@ -1,0 +1,34 @@
+version: "3.7"
+
+services:
+  api-pass-in:
+    build: 
+      context: .
+      target: dev
+    container_name: api-pass-in
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      - NODE_ENV=production
+      - PORT=${PORT}
+    depends_on:
+      - postgres
+    networks:
+      - passin
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  postgres:
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
+    networks:
+      - passin
+
+networks:
+  passin:
+    driver: bridge
+
+volumes:
+  db:

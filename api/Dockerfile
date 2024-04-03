@@ -4,18 +4,21 @@ WORKDIR /app
 
 COPY package.json bun.lockb ./
 
-RUN bun install --production
+RUN bun install
 
-FROM base AS build
+FROM base as dev
 
 WORKDIR /app
 
 COPY . .
+
+FROM dev AS build
+
 COPY --from=base /app/node_modules ./node_modules
 
 RUN bun run build
 
-FROM build AS release
+FROM build AS prod
 
 WORKDIR /app
 

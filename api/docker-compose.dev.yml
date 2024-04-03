@@ -4,6 +4,7 @@ services:
   api-pass-in:
     build: 
       context: .
+      target: dev
     container_name: api-pass-in
     ports:
       - ${PORT}:${PORT}
@@ -14,24 +15,20 @@ services:
       - postgres
     networks:
       - passin
+    volumes:
+      - .:/app
+      - /app/node_modules
 
   postgres:
-    image: postgres:16.2
-    container_name: db-pass-in
-    ports:
-      - "${DB_PORT}:5432"
-    environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_DB=${DB_NAME}
-    volumes:
-      - 'db:/var/lib/postgresql/data'
+    extends:
+      file: docker-compose.base.yml
+      service: postgres
     networks:
       - passin
+
+volumes:
+  db:
 
 networks:
   passin:
     driver: bridge
-
-volumes:
-  db:
