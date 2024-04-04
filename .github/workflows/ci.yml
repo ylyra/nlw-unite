@@ -39,3 +39,13 @@ jobs:
         docker push ylyra/passin:${{ steps.generate_hash.outputs.hash }}
         docker tag ylyra/passin:${{ steps.generate_hash.outputs.hash }} ylyra/passin:latest
         docker push ylyra/passin:latest
+    
+    - name: Update image tag
+      uses: fjogeleit/yaml-update-action@main
+      with:
+        branch: main
+        valueFile: 'deploy/values.yaml'
+        propertyPath: 'image.tag'
+        value: "${{ steps.generate_sha.outputs.sha }}"
+        commitChange: true
+        message: 'NEW: Update tag in values helm'
