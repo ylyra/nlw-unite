@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: passin-deployment
+  labels:
+    app: passin
+
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: passin
+  template:
+    metadata:
+      labels:
+        app: passin
+    spec:
+      containers:
+        - name: passin
+          image: ylyra/passin:26df6dd
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: db-connection
+                  key: db_url
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: nlw-env
+                  key: port
+          ports:
+            - containerPort: 3333
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 400m
+              memory: 512Mi

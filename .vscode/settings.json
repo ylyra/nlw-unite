@@ -1,0 +1,8 @@
+{
+  "yaml.schemas": {
+    "https://kubernetesjsonschema.dev/v1.18.1/deployment-apps-v1.json": "file:///home/ylyra/apps/nlw-unite/api/k8s/deployment.yaml",
+    "https://kubernetesjsonschema.dev/v1.18.1/service.json": "file:///home/ylyra/apps/nlw-unite/api/k8s/service.yaml",
+    "https://kubernetesjsonschema.dev/v1.18.1/configmap.json": "file:///home/ylyra/apps/nlw-unite/api/k8s/configmap.yaml",
+    "https://kubernetesjsonschema.dev/v1.18.1/secret.json": "file:///home/ylyra/apps/nlw-unite/api/k8s/secret.yaml"
+  }
+}
